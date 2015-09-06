@@ -1,1 +1,90 @@
-My Page
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Fluff Test2</title>
+<meta name=viewport content="width=device-width,user-scalable=yes"/>
+<style>
+body {
+	font-family: arial, helvetica, sans serif;
+}
+</style>
+
+<script language="javascript" type="text/javascript" src="./jquery.js"></script>
+<script language="javascript" type="text/javascript" src="./jquery.flot.js"></script>
+
+</head>
+<body>
+<h2>Fluffy Test2</h2>
+
+<li>energy: <span id="energyID">NA</span></li>
+<li>interval: <span id="intID">NA</span> ms</li>
+<div id="graph" style="width:300px;height:200px;"></div>
+
+<script type="text/javascript">
+$(function () {
+    var data = [], totalPoints = 300;
+
+    var x=0.0,y=0.0,z=0.0;
+    var ox=0.0,oy=0.0,oz=0.0;
+    var dx=0.0,dy=0.0,dz=0.0;
+    var v=0.0
+
+      while (data.length < totalPoints) {
+            data.push(0.0);
+        }
+
+if (window.DeviceMotionEvent != undefined)
+{
+     window.ondevicemotion = function(e)
+     {
+		x = event.accelerationIncludingGravity.x;
+		y = event.accelerationIncludingGravity.y;
+		z = event.accelerationIncludingGravity.z;
+
+                dx = x-ox; dy = y-oy; dz = z-oz;
+                ox = x; oy = y; oz = z;
+
+                v = 100.0 * ( dx*dx + dy*dy + dz*dz );
+                //v = ( v+1 ) % 100;
+                
+		document.getElementById("energyID").innerHTML = v;
+		document.getElementById("intID").innerHTML = event.interval;
+
+               data = data.slice(1);
+               data.push( v )
+	}
+}
+
+    function getData() {
+        // push the (x,y) pairs 
+        var points = [];
+        for (var x = 0; x < data.length; x++ )
+            points.push([x, data[x]])
+        return points;
+    }
+
+    // setup control widget
+    var updateInterval = 10;
+
+    // setup plot
+    var options = {
+        series: { shadowSize: 0 }, // drawing is faster without shadows
+        yaxis: { min: 0, max: 100 },
+        xaxis: { show: false }
+    };
+    var plot = $.plot($("#graph"), [ getData() ], options);
+
+    function update() {
+        plot.setData([ getData() ]);
+        plot.draw();
+        
+        setTimeout(update, updateInterval);
+    }
+
+    update();
+});
+</script>
+
+
+</body>
+</html>
